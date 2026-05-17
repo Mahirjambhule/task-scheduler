@@ -60,6 +60,8 @@ Send a POST request to the Express API to enqueue a new background job.
   }
 }
 ```
+### Execution Logs Workflow
+![System Logs Workflow](./assets/logs.png)
 
 **Watch the logs:** As soon as the request is sent, you will see the API accept it, the Worker grab it (`BLMOVE`), process it, and save the final state to PostgreSQL.
 
