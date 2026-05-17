@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # 1. The Message Broker
+  redis-broker:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  # 2. The Database
+  postgres-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_PASSWORD: supersecret
+    ports:
+      - "5432:5432"
+
+  # 3. The API (Producer)
+  api-producer:
+    build: .
+    command: node producer.js
+    ports:
+      - "3000:3000"
+    environment:
+      - REDIS_HOST=redis-broker
+    depends_on:
+      - redis-broker
+
+  # 4. The Background Worker
+  background-worker:
+    build: .
+    command: node worker.js
+    environment:
+      - REDIS_HOST=redis-broker
+      - PG_HOST=postgres-db
+    depends_on:
+      - redis-broker
+      - postgres-db
+
+  # 5. The Self-Healing Sweeper
+  recovery-sweeper:
+    build: .
+    command: node sweeper.js
+    environment:
+      - REDIS_HOST=redis-broker
+    depends_on:
+      - redis-broker
